@@ -1,0 +1,425 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr 22 12:53:48 2020
+
+@author: jmald
+"""
+
+import time
+import numpy as np
+from matplotlib import pyplot as plt
+
+print("")
+print("tic_tac_toe.py")
+print("")
+time.sleep(1)
+print("")
+print("An error will pop up when plotting cirlces. This can be ignored.")
+print("")
+print("")
+
+pos1=1.5
+pos2=4.5
+pos3=7.5
+
+p1=[pos1,pos3]
+p2=[pos2,pos3]
+p3=[pos3,pos3]
+p4=[pos1,pos2]
+p5=[pos2,pos2]
+p6=[pos3,pos2]
+p7=[pos1,pos1]
+p8=[pos2,pos1]
+p9=[pos3,pos1]
+
+print("The board : ")
+print("\u0332".join(" 1 | 2 | 3 "))
+print("\u0332".join(" 4 | 5 | 6 "))
+print(" 7 | 8 | 9 ")
+print("")
+
+i=0
+class cpuSpeak:
+    def win():
+        winRemarks=["Hahahaha, I win this one!","Looks like I take the cake here!","I'll just place this piece here, thank you very much.","Winner winner, chicken dinner!","And the computer bests the human!","Winner!"]
+        print("")
+        print("")
+        print( "cpu : "+winRemarks[ np.random.randint(len(winRemarks)) ] )
+        print("")
+        print("")
+    def lose():
+        loseRemarks=["Noooooooooo!","Looks like you win this round","Darn! Looks like I lost.","I'll get you next time!","Rematch! I'll show you!","That's okay. I'm just giving you a false sense of confidence.","Looks like the human takes this round."]
+        print("")
+        print("")
+        print( "cpu : "+loseRemarks[ np.random.randint(len(loseRemarks)) ] )
+        print("")
+        print("")
+    def block(i):
+        blockRemarks=["Looks like I've foiled your plans!","I'm not going to let you take position "+str(i)+" that easily!","Not going to let you take spot "+str(i)+" and win!","I think I'll place this piece ... HERE!","Not so fast!","You can't win that easy!","I'm smarter than you think!","You can't trick me that easy!","Position "+str(i)+" is mine!","Position "+str(i)+" won't stay open any longer!"]
+        print("")
+        print("")
+        print( "cpu : "+blockRemarks[ np.random.randint(len(blockRemarks)) ] )
+        print("")
+        print("")
+    def center():
+        centerRemarks=["You didn't take the center?! Big mistake.","I'll take the center if you won't!","Oh, don't mind if I do.","Ah, the most important spot is mine."]
+        print("")
+        print("")
+        print( "cpu : "+centerRemarks[ np.random.randint(len(centerRemarks)) ] )
+        print("")
+        print("")
+    def rand():
+        randRemarks=["Hmm, looks like there's not too much going on here.","I guess I'll take this spot.","I'm on to you...","I'll just take any old spot","Lets see how this goes..."]
+        print("")
+        print("")
+        print( "cpu : "+randRemarks[ np.random.randint(len(randRemarks)) ] )
+        print("")
+        print("")
+
+def x(p):
+    return np.arange(p-0.5,p+0.5+0.0005,0.0005)
+
+def makeTop(p,t):
+    if t==0:
+        return np.sqrt(.25-(x(p[0])-p[0])**2)+p[1]
+    if t==1:
+        return np.abs(x(p[0])-p[0])+p[1]
+def makeBot(p,t):
+    if t==0:
+        return -np.sqrt(.25-(x(p[0])-p[0])**2)+p[1]
+    if t==1:
+        return -np.abs(x(p[0])-p[0])+p[1]
+def place(p,t):
+    if t==0:
+        return [plt.plot( x(p[0]),makeTop(p,t) ,'r'),plt.plot( x(p[0]),makeBot(p,t) ,'r')]
+    if t==1:
+        return [plt.plot( x(p[0]),makeTop(p,t) ,'b'),plt.plot( x(p[0]),makeBot(p,t) ,'b')]
+
+#board
+a=np.arange(0,10,1)
+def board(a):
+    plt.figure(figsize=(8,8))
+    plt.xticks([])
+    plt.yticks([])
+    plt.plot(a,0*a+3,'k')
+    plt.plot(a,0*a+6,'k')
+    plt.plot(0*a+3,a,'k')
+    plt.plot(0*a+6,a,'k')
+
+
+
+def checkWin(locList,pieceT):
+    win=False
+    #test for horizontal wins : 
+    for n in [1,4,7]:
+        if [eval("p"+str(n)),pieceT] in locList and [eval("p"+str(n+1)),pieceT] in locList and [eval("p"+str(n+2)),pieceT] in locList:
+              win=True
+              #print("Horizontal win condition met.")
+              break
+    #test for vertical wins : 
+    for n in [1,2,3]:
+        if [eval("p"+str(n)),pieceT] in locList and [eval("p"+str(n+3)),pieceT] in locList and [eval("p"+str(n+6)),pieceT] in locList:
+              win=True
+              #print("Vertical win condition met.")
+              break
+    #manually test for diagonal wins : 
+    if [eval("p1"),pieceT] in locList and [eval("p5"),pieceT] in locList and [eval("p9"),pieceT] in locList:
+        win=True
+        #print("Diagonal win condition met.")
+    if [eval("p3"),pieceT] in locList and [eval("p5"),pieceT] in locList and [eval("p7"),pieceT] in locList:
+        win=True
+        #print("Diagonal win condition met.")
+    #print("Win condition = "+str(win))
+    return win
+
+#The Game Setup:
+wins=0
+losses=0
+ties=0
+loop=1
+more=1
+games=0
+turns=0
+pieceLoc=[] #[([px,py],t),([px,py],t),([px,py],t)] This is for checking where pieces are
+pL=[]       #[(l,t),(l,t),(l,t),(l,t)] This is for placing the pieces
+typo=0
+block=0
+
+#The Game:
+moreGames=True
+while moreGames==True:
+    #variable setup : 
+    openLoc=[1,2,3,4,5,6,7,8,9]
+    pieceLoc=[]
+    pL=[]
+    games+=1
+    winCondition=0
+    
+    #get user gamepiece type : 
+    typo=1
+    while typo==1:
+        type=(input("What type of piece? (x/o) : "))
+        if type=='x':
+            t=1
+            tC=0
+            typo=0
+        elif type=='o':
+            t=0
+            tC=1
+            typo=0
+        else:
+            print("")
+            print("Oop!",end=" ")
+            time.sleep(1)
+            print("You've made a typo.")
+            time.sleep(0.5)
+            print("Try again.")
+    
+    #the game itself : 
+    while more==1:
+        turns+=1
+        typo=1
+        possible=1
+        while typo==1:
+            #ask where to get the next piece : 
+            while possible==1:
+                possible=0
+                loc=int(input("Where do you want to place the next piece? : "))
+                for i in np.arange(0,len(pieceLoc),1):
+                    if pieceLoc[i][0]==eval("p"+str(loc)):
+                        print("")
+                        print("Oop!",end=" ")
+                        time.sleep(1)
+                        print("That spot has a piece in it already.")
+                        time.sleep(0.75)
+                        print("Try again.")
+                        possible=1
+            #check to see if the location is even on the board : 
+            openLoc.remove(loc)
+            if loc==1:
+                l=p1
+                typo=0
+            if loc==2:
+                l=p2
+                typo=0
+            if loc==3:
+                l=p3
+                typo=0
+            if loc==4:
+                l=p4
+                typo=0
+            if loc==5:
+                l=p5
+                typo=0
+            if loc==6:
+                l=p6
+                typo=0
+            if loc==7:
+                l=p7
+                typo=0
+            if loc==8:
+                l=p8
+                typo=0
+            if loc==9:
+                l=p9
+                typo=0
+            if loc!=1 and loc!=2 and loc!=3 and loc!=4 and loc!=5 and loc!=6 and loc!=7 and loc!=8 and loc!=9:
+                print("")
+                print("Oop!",end=" ")
+                time.sleep(1)
+                print("That spot has a piece in it already.")
+                time.sleep(0.75)
+                print("Try again.")
+        
+        #place piece and store its location
+        pL.append( "place("+str(l)+","+str(t)+")" )
+        pieceLoc.append( [l,t] )
+        board(a)
+        for i in np.arange(0,( len(eval("pL")) ),1):
+            eval(pL[i])
+        plt.show()
+        #check wins
+        if checkWin(pieceLoc,t)==True:
+            #cpuSpeak.lose()
+            print("You win!")
+            wins+=1
+            break
+        if checkWin(pieceLoc,tC)==True:
+            print("")
+            print("You lose!")
+            losses+=1
+            break
+        #check to see if board is full : 
+        if len(pieceLoc)>=9:
+            print("")
+            print("")
+            print("Board is full!")
+            print("")
+            print("Cat game!")
+            print("")
+            ties+=1
+            break
+        
+        """
+have computer place piece : 
+        """
+        time.sleep(1)
+        #computer checks to see if the next move will let the computer win the game : 
+        checkLoc=[]
+        grabWin=0
+        spoke=False
+        for i in np.arange(len(pieceLoc)):
+            checkLoc.append( pieceLoc[i] )
+        for i in openLoc:
+            checkLoc.append( [eval("p"+str(i)),tC] )
+            if checkWin(checkLoc,tC)==True:
+                #cpuSpeak.win()
+                lC=i
+                grabWin=1
+                break
+            del checkLoc[-1]
+            if grabWin==1:
+                break
+        
+        if grabWin==0:
+            #computer checks to see if user will win in the next move : 
+            checkLoc=[]
+            blocked=0
+            speak=[]
+            for i in np.arange(len(pieceLoc)):
+                checkLoc.append( pieceLoc[i] )
+            for i in openLoc:
+                checkLoc.append( [eval("p"+str(i)),t] )
+                if checkWin(checkLoc,t)==True and blocked==0:
+                    #cpuSpeak.block(i)
+                    block+=1
+                    lC=i
+                    for i in np.arange(0,len(pieceLoc),1):
+                        if pieceLoc[i][0]!=eval("p"+str(lC)):
+                            blocked=1
+                            break
+                del checkLoc[-1]
+                
+            
+            #if the center is open, take the center 80% of the time : 
+            chance=np.random.randint(1,10)
+            if 5 in openLoc:
+                if chance<=9:
+                    #cpuSpeak.center()
+                    lC=5
+                    blocked=1
+            #computer places piece randomly :
+            possible=1
+            numtest=0
+            spoke=False
+            while possible==1 and blocked==0:
+                possible=0
+                lC=np.random.randint(1,10,1)[0]
+                for i in np.arange(0,len(pieceLoc),1):
+                    if pieceLoc[i][0]==eval("p"+str(lC)):
+                        numtest+=1
+                        possible=1
+                if spoke==False:
+                    #cpuSpeak.rand()
+                    spoke=True
+        openLoc.remove(lC)
+        if lC==1:
+            lC=p1
+        if lC==2:
+            lC=p2
+        if lC==3:
+            lC=p3
+        if lC==4:
+            lC=p4
+        if lC==5:
+            lC=p5
+        if lC==6:
+            lC=p6
+        if lC==7:
+            lC=p7
+        if lC==8:
+            lC=p8
+        if lC==9:
+            lC=p9
+        
+        #plot piece : 
+        pL.append( "place("+str(lC)+","+str(tC)+")" )
+        pieceLoc.append([lC,tC])
+        board(a)
+        for i in np.arange(0,( len(eval("pL")) ),1):
+            eval(pL[i])
+        plt.show()
+        #check wins : 
+        if checkWin(pieceLoc,t)==True:
+            #cpuSpeak.lose()
+            print("You win!")
+            wins+=1
+            break
+        if checkWin(pieceLoc,tC)==True:
+            print("")
+            print("You lose!")
+            losses+=1
+            break
+        #check to see if the board is full : 
+        print("")
+        if len(pieceLoc)>=9:
+            print("")
+            print("")
+            print("Board is full!")
+            print("")
+            winCondition=1
+    
+    #ask if the player wants to play again : 
+    typo=1
+    while typo==1:
+        print("")
+        print("")
+        playMore=input("Would you like to play another game? (yes/no) : ")
+        print("")
+        if playMore=="yes":
+            print("Setting up another game!")
+            print("")
+            print("")
+            typo=0
+        elif playMore=="no":
+            print("")
+            print("")
+            print("Thanks for playing!")
+            print("")
+            print("")
+            print("- - - - - - - - - - - - - - - - - - - - - - - - - - -")
+            print("Game stats : ")
+            print("Games played : "+str(games))
+            print("Wins :         "+str(wins))
+            print("Ties :         "+str(ties))
+            print("Losses :       "+str(losses))
+            print("")
+            #print("***   ***   ***   ***   ***   ***   ***")
+            print("")
+            
+            print("Fun Facts : ")
+            if wins>losses:
+                print("- Yay, you won more than you lost!")
+            elif wins<losses:
+                print("- Rekt, you lost more than you won!")
+            else:
+                print("- You tied with the computer in wins and losses!")
+            
+            if ties>=0.5*games:
+                print("- Woah, that's a lot of tied games!")
+            
+            if block==1:
+                print("- You were blocked "+str(block)+" time!")
+            elif block>1:
+                print("- You were blocked "+str(block)+" times!")
+            print("- - - - - - - - - - - - - - - - - - - - - - - - - - -")
+            typo=0
+            moreGames=False
+        else:
+            print("")
+            print("Oop!",end=" ")
+            time.sleep(1)
+            print("You've made a typo.")
+            time.sleep(0.75)
+            print("Try again.")
+            
